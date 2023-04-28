@@ -1,33 +1,30 @@
 #%%
-import click
 import pulp
 import init_data 
 import time
 
-# @click.command()
-# @click.option('--num', default = 3, help='the number of jobs')
 def main(num):
+    #定数の定義
     J,W,P,R = init_data.init_let_data(num)
     T = max(list(R.values())) + sum(list(P.values()))
     JT = [(j+1,t) for j in range(len(J)) for t in range(T+1)]
     
-    prob=pulp.LpProblem(name="prob", sense=pulp.LpMinimize)
+    #変数の定義
+    prob=pulp.LpProblem(name="prob", sense = pulp.LpMinimize)
     C = pulp.LpVariable.dicts('C', J, lowBound=0, cat='Integer')
-    z = pulp.LpVariable.dicts('y',JT ,  cat='Binary')
+    z = pulp.LpVariable.dicts('z',JT ,  cat='Binary')
 
-
-
-    prob += pulp.lpSum([t*z[j,t] + P[j] for j in J for t in range(T)])
-
-
-    # 制約式
+    # 制約条件の定義
     for j in J:
-        prob += pulp.lpSum(z[j,t] for t in range(R[j],T-P[j])) == 1
+        prob += pulp.lpSum(z[j,t] for t in range(R[j],T-P[j]+1)) == 1
 
     for t in range(T+1):
-        prob += pulp.lpSum(pulp.lpSum(z[j,t2] for t2 in range(max(t-P[j],0)+1,t) for j in J)) <= 1
+        prob += pulp.lpSum(pulp.lpSum(z[j,t2] for t2 in range(max(t-P[j],0)+1,t+1) for j in J)) <= 1
 
+    #目的関数の定義
+    prob += pulp.lpSum([W[j]*pulp.lpSum([t * z[j,t]+P[j] for t in range(T+1)]) for j in J])
 
+    #求解
     start = time.time()
     status = prob.solve()
     end = time.time()
