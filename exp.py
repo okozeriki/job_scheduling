@@ -10,7 +10,7 @@ with open("result.csv", "w", newline='') as csvfile:
     writer.writerow(["model","J", "status", "value", "time",1,2,3,4,5,6,7,8,9,10])
 
 
-    for i in range(1,9):
+    for i in range(1,11):
         status, value, t, sorted_job = model1.main(i)
         writer.writerow(["定式化1",i, status, value, t]+sorted_job)
 

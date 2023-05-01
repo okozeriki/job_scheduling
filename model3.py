@@ -7,7 +7,7 @@ def main(num):
     #定数の定義
     J,W,P,R = init_data.init_let_data(num)
     T = max(list(R.values())) + sum(list(P.values()))
-    JT = [(j+1,t) for j in range(len(J)) for t in range(T+1)]
+    JT = [(j,t) for j in J for t in range(T+1)]
     
     #変数の定義
     prob=pulp.LpProblem(name="prob", sense = pulp.LpMinimize)
@@ -19,17 +19,18 @@ def main(num):
         prob += pulp.lpSum(z[j,t] for t in range(R[j],T-P[j]+1)) == 1
 
     for t in range(T+1):
-        prob += pulp.lpSum(pulp.lpSum(z[j,t2] for t2 in range(max(t-P[j],0)+1,t+1) for j in J)) <= 1
+        prob += pulp.lpSum([pulp.lpSum([z[j,t2] for t2 in range(max(t-P[j]+1,0),t+1) ])for j in J]) <= 1
 
     #目的関数の定義
-    prob += pulp.lpSum([W[j]*pulp.lpSum([t * z[j,t]+P[j] for t in range(T+1)]) for j in J])
+    prob += pulp.lpSum([W[j]*(pulp.lpSum(
+        [t * z[j,t] for t in range(T+1)])+P[j])
+          for j in J])
 
     #求解
     start = time.time()
     status = prob.solve()
     end = time.time()
 
-    
     print("************Result************")
     print(pulp.LpStatus[status])
     print("Optimal value=",prob.objective.value())
@@ -49,5 +50,6 @@ def main(num):
     return pulp.LpStatus[status],prob.objective.value(), t, sorted_job
 
 if __name__ == "__main__":
-    main(7)
+    main(3)
 # %%
+

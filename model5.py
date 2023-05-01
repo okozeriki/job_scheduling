@@ -43,7 +43,7 @@ def main(num):
 
     #求解
     start = time.time()
-    status = prob.solve()
+    status = prob.solve(pulp.PULP_CBC_CMD(timeLimit=300))
     end = time.time()
 
     result = {f"job{j}": (pulp.value(s[j]),pulp.value(C[j]),R[j]) for j in J}

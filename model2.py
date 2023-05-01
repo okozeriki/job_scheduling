@@ -23,7 +23,7 @@ def main(num):
         for k in J:
             if not j == k:
                 prob += x[j,k] + x[k,j] == 1
-                prob += s[j] >= R[k] * x[k,j] + pulp.lpSum([P[i] * (x[i,j] - x[i,k])for i in J if not i == j if not i == k])
+                prob += s[j] >= R[k] * x[k,j] + pulp.lpSum([P[i] * (x[i,j] - (x[i,k] if i != k else 0))for i in J if not i == j] )
                 for i in J:
                     if not k == i:
                         if not i == j:
